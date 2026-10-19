@@ -3,57 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Surat Keterangan Aktif Belajar</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>Suket Aktif Belajar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- jsPDF & jsPDF-AutoTable -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        body { background-color: #f4f7f6; overflow-x: hidden; }
+        .sidebar-gradient { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; min-height: 100vh; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+        .form-glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 20px; }
+        .form-label { font-weight: 500; font-size: 0.9rem; color: #e0e6ed; }
+        .form-control, .form-select { background-color: rgba(255, 255, 255, 0.9); border: none; }
+        .form-control:focus, .form-select:focus { box-shadow: 0 0 0 0.25rem rgba(255,255,255,0.25); }
+        .preview-area { height: 100vh; padding: 0; background-color: #525659; /* Warna khas background PDF viewer */ display: flex; flex-direction: column; }
+        #pdfPreview { width: 100%; flex-grow: 1; border: none; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #adb5bd; }
+        .empty-state i { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Cetak Surat Keterangan Aktif Belajar</h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="loading" class="text-center py-4">
-                            <div class="spinner-border text-primary" role="status"></div>
-                            <p class="mt-2 text-muted">Memuat data siswa dari Spreadsheet...</p>
-                        </div>
-
-                        <form id="formSurat" class="d-none">
-                            <div class="mb-3">
-                                <label for="selectKelas" class="form-label">Pilih Kelas / Rombel</label>
-                                <select class="form-select" id="selectKelas" required>
-                                    <option value="">-- Pilih Kelas --</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="selectSiswa" class="form-label">Pilih Nama Siswa</label>
-                                <select class="form-select" id="selectSiswa" required disabled>
-                                    <option value="">-- Pilih Siswa --</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="noSurat" class="form-label">Nomor Surat Keluar</label>
-                                <input type="text" class="form-control" id="noSurat" value="400.3.5/      /432.301.10.15/2026" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="tglSurat" class="form-label">Tanggal Surat</label>
-                                <input type="date" class="form-control" id="tglSurat" required>
-                            </div>
-
-                            <button type="button" id="btnCetak" class="btn btn-success w-100" disabled>Cetak Suket Aktif (PDF)</button>
-                        </form>
-                    </div>
+    <div class="container-fluid">
+        <div class="row h-100">
+            <!-- KIRI: Area Form (Sidebar) -->
+            <div class="col-md-4 col-lg-3 sidebar-gradient p-4 d-flex flex-column">
+                <div class="mb-4 text-center">
+                    <h5 class="fw-bold mb-0">E-Suket Aktif</h5>
+                    <small class="text-light opacity-75">SDN Tampojung Tenggina</small>
                 </div>
+
+                <div id="loading" class="text-center py-4 form-glass mb-4">
+                    <div class="spinner-border text-light" role="status"></div>
+                    <p class="mt-2 mb-0 small">Menghubungkan ke Database...</p>
+                </div>
+
+                <form id="formSurat" class="d-none form-glass flex-grow-0">
+                    <div class="mb-3">
+                        <label for="selectKelas" class="form-label"><i class="fas fa-chalkboard-teacher me-2"></i>Rombongan Belajar</label>
+                        <select class="form-select shadow-sm" id="selectKelas" required>
+                            <option value="">-- Pilih Kelas --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="selectSiswa" class="form-label"><i class="fas fa-user-graduate me-2"></i>Nama Siswa</label>
+                        <select class="form-select shadow-sm" id="selectSiswa" required disabled>
+                            <option value="">-- Pilih Siswa --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="noSurat" class="form-label"><i class="fas fa-file-signature me-2"></i>Nomor Surat Keluar</label>
+                        <input type="text" class="form-control shadow-sm" id="noSurat" value="400.3.5/      /432.301.10.15/2026" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="tglSurat" class="form-label"><i class="fas fa-calendar-alt me-2"></i>Tanggal Surat</label>
+                        <input type="date" class="form-control shadow-sm" id="tglSurat" required>
+                    </div>
+
+                    <button type="button" id="btnCetak" class="btn btn-light w-100 fw-bold shadow text-primary mb-2" disabled>
+                        <i class="fas fa-download me-2"></i>Unduh PDF
+                    </button>
+                </form>
+                
+                <div class="mt-auto pt-4 text-center">
+                    <small class="opacity-50">&copy; 2026 Administrasi Digital</small>
+                </div>
+            </div>
+
+            <!-- KANAN: Area Preview -->
+            <div class="col-md-8 col-lg-9 preview-area position-relative">
+                <!-- State Kosong sebelum siswa dipilih -->
+                <div id="emptyPreview" class="empty-state bg-light">
+                    <i class="fas fa-file-pdf"></i>
+                    <h4>Preview Surat</h4>
+                    <p>Pilih siswa pada panel di sebelah kiri untuk melihat tampilan surat.</p>
+                </div>
+                
+                <!-- Iframe untuk menampilkan PDF secara live -->
+                <iframe id="pdfPreview" class="d-none"></iframe>
             </div>
         </div>
     </div>
@@ -81,7 +110,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('loading').innerHTML = '<p class="text-danger">Gagal memuat data. Periksa kembali URL Web App Anda.</p>';
+                    document.getElementById('loading').innerHTML = '<p class="text-danger mb-0">Gagal memuat data.</p>';
                 });
         });
 
@@ -91,7 +120,6 @@
             img.onload = function () {
                 logoOriginalWidth = img.width;
                 logoOriginalHeight = img.height;
-
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width;
                 canvas.height = img.height;
@@ -118,10 +146,10 @@
             const selectedKelas = this.value;
             const selectSiswa = document.getElementById('selectSiswa');
             selectSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+            resetPreview();
             
             if (!selectedKelas) {
                 selectSiswa.disabled = true;
-                document.getElementById('btnCetak').disabled = true;
                 return;
             }
 
@@ -139,9 +167,41 @@
             selectSiswa.disabled = false;
         });
 
-        document.getElementById('selectSiswa').addEventListener('change', function() {
-            document.getElementById('btnCetak').disabled = !this.value;
+        // Trigger update preview secara otomatis saat ada perubahan input
+        ['selectSiswa', 'noSurat', 'tglSurat'].forEach(id => {
+            document.getElementById(id).addEventListener('input', handlePreviewUpdate);
         });
+
+        function handlePreviewUpdate() {
+            const selectSiswa = document.getElementById('selectSiswa');
+            if (!selectSiswa.value) {
+                resetPreview();
+                return;
+            }
+            
+            document.getElementById('btnCetak').disabled = false;
+            
+            const studentData = JSON.parse(selectSiswa.options[selectSiswa.selectedIndex].dataset.student);
+            const noSurat = document.getElementById('noSurat').value;
+            const tglSurat = document.getElementById('tglSurat').value;
+
+            // Generate PDF untuk preview
+            const doc = createPDFDocument(studentData, noSurat, tglSurat);
+            
+            // Tampilkan Blob URL di iframe
+            const pdfBlob = doc.output('bloburl');
+            document.getElementById('emptyPreview').classList.add('d-none');
+            const iframe = document.getElementById('pdfPreview');
+            iframe.src = pdfBlob;
+            iframe.classList.remove('d-none');
+        }
+
+        function resetPreview() {
+            document.getElementById('btnCetak').disabled = true;
+            document.getElementById('emptyPreview').classList.remove('d-none');
+            document.getElementById('pdfPreview').classList.add('d-none');
+            document.getElementById('pdfPreview').src = '';
+        }
 
         document.getElementById('btnCetak').addEventListener('click', function() {
             const selectSiswa = document.getElementById('selectSiswa');
@@ -149,7 +209,8 @@
             const noSurat = document.getElementById('noSurat').value;
             const tglSurat = document.getElementById('tglSurat').value;
 
-            generatePDF(studentData, noSurat, tglSurat);
+            const doc = createPDFDocument(studentData, noSurat, tglSurat);
+            doc.save(`Suket_Aktif_${studentData.nama.replace(/\s+/g, '_')}.pdf`);
         });
 
         function formatTanggalIndo(dateStr) {
@@ -160,13 +221,13 @@
             return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
 
-        function generatePDF(s, noSurat, tglSurat) {
+        // Fungsi dipisah menjadi pembuat dokumen agar bisa digunakan untuk Preview dan Download
+        function createPDFDocument(s, noSurat, tglSurat) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
 
             doc.setFont("helvetica", "normal");
 
-            // 1. Logo
             if (logoBase64 && logoOriginalHeight > 0) {
                 const targetHeight = 25;
                 const aspectRatio = logoOriginalWidth / logoOriginalHeight;
@@ -174,7 +235,6 @@
                 doc.addImage(logoBase64, 'PNG', 18, 12, targetWidth, targetHeight);
             }
 
-            // 2. Kop Surat
             doc.setFont("helvetica", "normal");
             doc.setFontSize(12);
             doc.text("PEMERINTAH KABUPATEN PAMEKASAN", 116, 16, { align: "center" });
@@ -189,13 +249,11 @@
             doc.text("Dusun Sa Asa, Desa Tampojung Tenggina, Waru, Pamekasan, Jawa Timur 69353,", 116, 34, { align: "center" });
             doc.text("Pos-el: sdntampojungtenggina@gmail.com", 116, 39, { align: "center" });
 
-            // Garis Kop Surat
             doc.setLineWidth(0.6);
             doc.line(18, 43, 192, 43);
             doc.setLineWidth(0.2);
             doc.line(18, 44, 192, 44);
 
-            // 3. Judul Surat (Diturunkan 1 baris ke Y = 54) & Nomor Surat (Y = 60)
             doc.setFont("helvetica", "bold");
             doc.setFontSize(14);
             doc.text("SURAT KETERANGAN AKTIF BELAJAR", 105, 54, { align: "center" });
@@ -204,11 +262,10 @@
             doc.setFontSize(12);
             doc.text("Nomor: " + noSurat, 105, 60, { align: "center" });
 
-            // 4. Identitas Kepala Sekolah
             let startY = 70;
             const leftCol = 22;
-            const colonCol = 72; // Digeser ke kanan agar tidak bertabrakan
-            const valCol = 75;   // Digeser ke kanan
+            const colonCol = 72; 
+            const valCol = 75;   
 
             const kepalaSekolah = [
                 ["Nama", "MASKUR, S.Pd.SD"],
@@ -233,7 +290,6 @@
             doc.text("Menyatakan dengan sebenarnya bahwa :", leftCol, startY);
             startY += 6;
 
-            // 5. Identitas Siswa
             let ttl = `${s.tempatLahir}, ${formatTanggalIndo(s.tanggalLahir)}`;
             let nisNisnStr = `${s.nis} / ${s.nisn}`;
 
@@ -253,7 +309,6 @@
                 startY += 6;
             });
 
-            // 6. Isi Pernyataan & Penutup
             startY += 4;
             let pernyataan = `Anak tersebut benar-benar Siswa dari Sekolah Dasar Negeri Tampojung Tenggina pada tahun pelajaran 2026/2027.`;
             doc.text(doc.splitTextToSize(pernyataan, 168), leftCol, startY);
@@ -262,7 +317,6 @@
             let penutup = `Demikian pernyataan ini saya buat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya.`;
             doc.text(doc.splitTextToSize(penutup, 168), leftCol, startY);
 
-            // 7. Tempat & Tanda Tangan
             startY += 15;
             let tglFormatted = formatTanggalIndo(tglSurat);
             doc.text(`Pamekasan, ${tglFormatted}`, 130, startY);
@@ -275,7 +329,7 @@
             startY += 6;
             doc.text("NIP. 19721010 199605 1 001", 130, startY);
 
-            doc.save(`Suket_Aktif_${s.nama.replace(/\s+/g, '_')}.pdf`);
+            return doc;
         }
     </script>
 </body>
